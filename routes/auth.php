@@ -11,17 +11,9 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
+// ==================== ROUTES ACTIVES (Connexion uniquement) ====================
+
 Route::middleware('guest')->group(function () {
-    Route::get('register', [RegisteredUserController::class, 'create'])
-        ->name('register');
-
-    Route::post('register', [RegisteredUserController::class, 'store']);
-
-    Route::get('login', [AuthenticatedSessionController::class, 'create'])
-        ->name('login');
-
-    Route::post('login', [AuthenticatedSessionController::class, 'store']);
-
     // Routes de connexion séparées pour étudiants et professeurs
     Route::get('login/etudiant', [\App\Http\Controllers\Auth\EtudiantLoginController::class, 'create'])
         ->name('login.etudiant');
@@ -34,6 +26,31 @@ Route::middleware('guest')->group(function () {
 
     Route::post('login/professeur', [\App\Http\Controllers\Auth\ProfesseurLoginController::class, 'store'])
         ->name('login.professeur.store');
+
+    // Route login par défaut (redirection vers accueil)
+    Route::get('login', function () {
+        return redirect()->route('home');
+    })->name('login');
+});
+
+// Route de déconnexion (nécessaire pour les utilisateurs connectés)
+Route::middleware('auth')->group(function () {
+    Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
+        ->name('logout');
+});
+
+// ==================== ROUTES TEMPORAIREMENT DÉSACTIVÉES ====================
+/*
+Route::middleware('guest')->group(function () {
+    Route::get('register', [RegisteredUserController::class, 'create'])
+        ->name('register');
+
+    Route::post('register', [RegisteredUserController::class, 'store']);
+
+    Route::get('login', [AuthenticatedSessionController::class, 'create'])
+        ->name('login');
+
+    Route::post('login', [AuthenticatedSessionController::class, 'store']);
 
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
         ->name('password.request');
@@ -66,7 +83,5 @@ Route::middleware('auth')->group(function () {
     Route::post('confirm-password', [ConfirmablePasswordController::class, 'store']);
 
     Route::put('password', [PasswordController::class, 'update'])->name('password.update');
-
-    Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
-        ->name('logout');
 });
+*/

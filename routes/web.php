@@ -9,24 +9,39 @@ use App\Http\Controllers\MatiereController;
 use App\Http\Controllers\PublicationController;
 use Illuminate\Support\Facades\Route;
 
+// ==================== ROUTES ACTIVES ====================
+
 // Page d'accueil publique avec les publications
 Route::get('/', [PublicationController::class, 'accueil'])->name('home');
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// Dashboards simples (redirection après connexion)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard/etudiant', function () {
+        return view('dashboard-etudiant-temp');
+    })->name('dashboard.etudiant');
 
+    Route::get('/dashboard/professeur', function () {
+        return view('dashboard-professeur-temp');
+    })->name('dashboard.professeur');
+
+    // Dashboard par défaut (redirection)
+    Route::get('/dashboard', function () {
+        $user = auth()->user();
+        if ($user->role === 'etudiant') {
+            return redirect()->route('dashboard.etudiant');
+        } elseif ($user->role === 'professeur') {
+            return redirect()->route('dashboard.professeur');
+        }
+        return redirect()->route('home');
+    })->name('dashboard');
+});
+
+// ==================== ROUTES TEMPORAIREMENT DÉSACTIVÉES ====================
+/*
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
-    // Routes dashboard séparées
-    Route::get('/dashboard/etudiant', [DashboardController::class, 'etudiant'])
-        ->name('dashboard.etudiant');
-
-    Route::get('/dashboard/professeur', [DashboardController::class, 'professeur'])
-        ->name('dashboard.professeur');
 
     // ==================== ROUTES ÉTUDIANT ====================
     Route::prefix('etudiant')->name('etudiant.')->group(function () {
@@ -76,5 +91,6 @@ Route::middleware('auth')->group(function () {
         Route::delete('/publications/{publication}', [PublicationController::class, 'destroy'])->name('publications.destroy');
     });
 });
+*/
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
